@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.module.min.js';
+
 let camera, scene, renderer;
 
 initHTML();
@@ -10,19 +11,15 @@ function init3D() {
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    ///document.body.appendChild(renderer.domElement);
 
-    //this puts the three.js stuff in a particular div
-    document.getElementById('THREEcontainer').appendChild(renderer.domElement)
+    document.getElementById('THREEcontainer').appendChild(renderer.domElement);
 
-    let bgGeometery = new THREE.SphereGeometry(1000, 60, 40);
-    // let bgGeometery = new THREE.CylinderGeometry(725, 725, 1000, 10, 10, true)
-    bgGeometery.scale(-1, 1, 1);
-    // has to be power of 2 like (4096 x 2048) or(8192x4096).  i think it goes upside down because texture is not right size
+    let bgGeometry = new THREE.SphereGeometry(1000, 60, 40);
+    bgGeometry.scale(-1, 1, 1);
+
     let panotexture = new THREE.TextureLoader().load("itp.jpg");
-    // var material = new THREE.MeshBasicMaterial({ map: panotexture, transparent: true,   alphaTest: 0.02,opacity: 0.3});
     let backMaterial = new THREE.MeshBasicMaterial({ map: panotexture });
-    let back = new THREE.Mesh(bgGeometery, backMaterial);
+    let back = new THREE.Mesh(bgGeometry, backMaterial);
     scene.add(back);
 
     moveCameraWithMouse();
@@ -50,33 +47,31 @@ function initHTML() {
     const textInput = document.createElement("input");
     textInput.setAttribute("type", "text");
     textInput.setAttribute("id", "textInput");
-    textInput.setAttribute("placeholder", "Enter text here");
+    textInput.setAttribute("placeholder", "Paint the sky with your words...");
     document.body.appendChild(textInput);
     textInput.style.position = "absolute";
-    textInput.style.top = "50%";
-    textInput.style.left = "50%";
-    textInput.style.transform = "translate(-50%, -50%)";
+    textInput.style.top = "20px";
+    textInput.style.left = "20px";
     textInput.style.zIndex = "5";
 
     textInput.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {  //checks whether the pressed key is "Enter"
-            const pos = find3DCoornatesInFrontOfCamera(150 - camera.fov);
+        if (e.key === "Enter") {
+            const pos = find3DCoordinatesInFrontOfCamera(150 - camera.fov);
             createNewText(textInput.value, pos);
+            textInput.value = ""; // Clear input after submitting
         }
     });
 }
 
-function find3DCoornatesInFrontOfCamera(distance) {
+function find3DCoordinatesInFrontOfCamera(distance) {
     let vector = new THREE.Vector3();
-    vector.set(0, 0, 0); //middle of the screen where input box is
+    vector.set(0, 0, 0);
     vector.unproject(camera);
     vector.multiplyScalar(distance)
     return vector;
 }
 
 function createNewText(text_msg, posInWorld) {
-
-    console.log("Created New Text", posInWorld);
     var canvas = document.createElement("canvas");
     canvas.width = 512;
     canvas.height = 512;
@@ -85,7 +80,7 @@ function createNewText(text_msg, posInWorld) {
     var fontSize = Math.max(camera.fov / 2, 72);
     context.font = fontSize + "pt Arial";
     context.textAlign = "center";
-    context.fillStyle = "red";
+    context.fillStyle = getRandomColor(); // Let's make it colorful!
     context.fillText(text_msg, canvas.width / 2, canvas.height / 2);
     var textTexture = new THREE.Texture(canvas);
     textTexture.needsUpdate = true;
@@ -97,33 +92,25 @@ function createNewText(text_msg, posInWorld) {
     mesh.position.y = posInWorld.y;
     mesh.position.z = posInWorld.z;
 
-    console.log(posInWorld);
     mesh.lookAt(0, 0, 0);
     mesh.scale.set(10, 10, 10);
     scene.add(mesh);
 }
 
-
-
-/////MOUSE STUFF
-
-let mouseDownX = 0, mouseDownY = 0;
-let lon = -90, mouseDownLon = 0;
-let lat = 0, mouseDownLat = 0;
-let isUserInteracting = false;
-
-
 function moveCameraWithMouse() {
-    //set up event handlers
     const div3D = document.getElementById('THREEcontainer');
     div3D.addEventListener('mousedown', div3DMouseDown, false);
     div3D.addEventListener('mousemove', div3DMouseMove, false);
     div3D.addEventListener('mouseup', div3DMouseUp, false);
     div3D.addEventListener('wheel', div3DMouseWheel, false);
     window.addEventListener('resize', onWindowResize, { passive: true });
-    //document.addEventListener('keydown', onDocumentKeyDown, false);
-    camera.target = new THREE.Vector3(0, 0, 0);  //something for the camera to look at
+    camera.target = new THREE.Vector3(0, 0, 0);
 }
+
+let mouseDownX = 0, mouseDownY = 0;
+let lon = -90, mouseDownLon = 0;
+let lat = 0, mouseDownLat = 0;
+let isUserInteracting = false;
 
 function div3DMouseDown(event) {
     mouseDownX = event.clientX;
@@ -147,15 +134,14 @@ function div3DMouseUp(event) {
 
 function div3DMouseWheel(event) {
     camera.fov += event.deltaY * 0.05;
-    camera.fov = Math.max(5, Math.min(100, camera.fov)); //limit zoom
+    camera.fov = Math.max(5, Math.min(100, camera.fov));
     camera.updateProjectionMatrix();
 }
 
 function computeCameraOrientation() {
-    lat = Math.max(- 30, Math.min(30, lat));  //restrict movement
-    let phi = THREE.MathUtils.degToRad(90 - lat);  //restrict movement
+    lat = Math.max(-30, Math.min(30, lat));
+    let phi = THREE.MathUtils.degToRad(90 - lat);
     let theta = THREE.MathUtils.degToRad(lon);
-    //move the target that the camera is looking at
     camera.target.x = 100 * Math.sin(phi) * Math.cos(theta);
     camera.target.y = 100 * Math.cos(phi);
     camera.target.z = 100 * Math.sin(phi) * Math.sin(theta);
@@ -166,5 +152,13 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    console.log('Resized');
+}
+
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
