@@ -29,10 +29,10 @@ function Font() {
     return (
         <group>
             <Text font={src} position={[0, 0, -.1]} fontSize={0.4} {...textOption}>
-            404
+            Shattered
             </Text>
             <Text font={src} position={[0, -.15, -.1]} fontSize={0.03} {...textOption}>
-            The link is broken
+            Play around with the settings
             </Text>
         </group>
     )
