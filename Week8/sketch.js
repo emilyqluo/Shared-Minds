@@ -23,7 +23,7 @@ function draw() {
   for (let i = 0; i < distances.length; i++) {
     let thisComparison = distances[i];
     let pixelDistance = (1 - thisComparison.distance) * width * 2;
-    text(thisComparison.phrase, 20, 20 + i * 30); // Adjusted Y position
+    text(thisComparison.phrase, 20, 20 + i * 30); 
   }
 }
 
@@ -57,7 +57,7 @@ async function askForEmbeddings(p_prompt) {
     distances.push({ "reference": firstOne.input, "phrase": thisOne.input, "distance": cdist });
     console.log(firstOne.input, thisOne.input, cdist);
   }
-  console.log("Distances:", distances); // Log the distances array
+  console.log("Distances:", distances); 
 }
 
 function cosineSimilarity(vecA, vecB) {
