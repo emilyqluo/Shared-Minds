@@ -1,0 +1,25 @@
+html {
+  background-color:rgb(69,66,66);
+}
+
+body {
+  background-color: white;
+  margin: 2em 4.5em;
+  padding: 30px;
+  border: thin solid white;
+}
+
+h1 {
+  color: rgb(229,0,69);
+  background-color: rgb(255,223,228);
+  font-family: Baskerville;
+}
+
+p {
+  color: black;
+  font-family: Inter;
+}
+
+a {
+  color: orange;
+}
